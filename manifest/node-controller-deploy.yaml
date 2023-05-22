@@ -25,7 +25,7 @@ spec:
         - --zap-devel
         - --zap-log-level=debug
         - --kind=node
-        image: k8s-policies-controller:bbd86f1-1-g92d81a7
+        image: k8s-policies-controller:bbd86f1-2-gccdf9e8
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
