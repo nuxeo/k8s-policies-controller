@@ -6,8 +6,6 @@ PATH:=$(PATH):/nix/store/777bwihbjqqvlw8pal36vydlpsvzglw9-coreutils-9.1/bin
 PATH:=$(PATH):/etc/profiles/per-user/nxmatic/bin
 PATH:=$(PATH):/nix/store/rzfnja8myhjwl0fgb8ixd1qdsnhw5mrr-goreleaser-1.13.0/bin
 
-$(warn PATH=$(PATH))
-
 controller-gen.bin := $(shell which controller-gen)
 controller-gen.bin := $(if $(controller-gen.bin),$(controller-gen.bin),$(GOPATH)/bin/controller-gen)
 
