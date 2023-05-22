@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach to Kubernetes Pod (Go)",
+            "type": "cloudcode.kubernetes",
+            "request": "attach",
+            "language": "Go",
+            "debugPort": 2345,
+            "podSelector": {
+                "app": "node-controller"
+            },
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/"
+        },
+        {
             "name": "workload policy",
             "type": "go",
             "request": "launch",

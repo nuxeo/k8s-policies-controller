@@ -1,157 +1,47 @@
-[![Go Report Card](https://goreportcard.com/badge/softonic/node-policy-webhook)](https://goreportcard.com/report/softonic/node-policy-webhook)
-[![Releases](https://img.shields.io/github/release-pre/softonic/node-policy-webhook.svg?sort=semver)](https://github.com/softonic/node-policy-webhook/releases)
-[![LICENSE](https://img.shields.io/github/license/softonic/node-policy-webhook.svg)](https://github.com/softonic/node-policy-webhook/blob/master/LICENSE)
-[![DockerHub](https://img.shields.io/docker/pulls/softonic/node-policy-webhook.svg)](https://hub.docker.com/r/softonic/node-policy-webhook)
+# Jenkins X CLI
+
+[![Documentation](https://godoc.org/github.com/jenkins-x/jx?status.svg)](https://pkg.go.dev/mod/github.com/jenkins-x/jx)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jenkins-x/jx)](https://goreportcard.com/report/github.com/jenkins-x/jx)
+[![Releases](https://img.shields.io/github/release-pre/jenkins-x/jx.svg)](https://github.com/jenkins-x/jx/releases)
+[![LICENSE](https://img.shields.io/github/license/jenkins-x/jx.svg)](https://github.com/jenkins-x/jx/blob/master/LICENSE)
+[![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://slack.k8s.io/)
+[![codecov](https://codecov.io/gh/jenkins-x/jx/branch/main/graph/badge.svg?token=aBT7eQHx37)](https://codecov.io/gh/jenkins-x/jx)
+
+`jx` is the modular command line CLI for [Jenkins X 3.x](https://jenkins-x.io/v3/about/)
+
+## Commands
+
+See the [jx command reference](https://jenkins-x.io/v3/develop/reference/jx/)
+
+## Issues
+
+To track [issues in this repository](https://github.com/jenkins-x/jx/issues) and all the related [Plugins](#plugins) use these links:
+
+* [view open issues in jenkins-x-plugins](https://github.com/issues?q=is%3Aopen+is%3Aissue+author%3Ajstrachan+archived%3Afalse+user%3Ajenkins-x-plugins)
+* [view open pull requests in jenkins-x-plugins](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Ajenkins-x-plugins+-label%3Adependencies)
+
+## Plugins
+
+You can browse the documentation for all of the `jx`  plugins at:
+
+* [Plugin CLI Reference](https://jenkins-x.io/v3/develop/reference/jx/)
+* [Plugin Source](https://github.com/jenkins-x-plugins)
 
 
-# node-policy-webhook
-K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
+## Components
 
-# Quick Start
+* [jx-git-operator](https://github.com/jenkins-x/jx-git-operator) is an operator for triggering jobs when git commits are made
+* [octant-jx](https://github.com/jenkins-x/octant-jx) an open source Jenkins X UI for  [vmware-tanzu/octant](https://github.com/vmware-tanzu/octant)
 
-Steps to got webhook working
+## Libraries
 
-- Deploy the webhook ( kubectl or helm )
-- Deploy NodePolicyProfile object
-- Deploy with the annotation ( below you can find it )  and watch if the pod is scheduled where was meant to
-
-## Deployment
-
-### Requirements
-
-In this example we assume you already have a k8s cluster running
-
-### Deploy using kubectl 
-
-```bash
-$ make deploy
-```
-
-You can find public image in the softonic/node-policy-webhook docker hub repository.
-More details about the deployment can be found here.
-* [Makefile - Build and Deploy](docs/makefile.md)
-
-
-
-### Deploy using Helm
-
-
-```bash
-$ make helm-deploy
-```
-
-More details about the deployment can be found here.
-* [Makefile - Build and Deploy](docs/makefile.md)
-
-
-## Create a NodePolicyProfile
-
-The resource has 3 fields, nodeSelector, tolerations and nodeAffinity
-You can try the repository's sample one.
-
-```bash
-$ kubectl apply -f samples/nodepolicyprofile.yaml
-```
-
-## Test the profile
-
-Add the profile annotation to your pods, and the mutating webhook will take place
-
-Below you can see an extract of a deployment manifest
-
-```
-...
-  template:
-    metadata:
-      annotations:
-        nodepolicy.softonic.io/profile: "stateless"
-...
-```
-
-
-# DEVEL ENVIRONMENT
-
-Compile the code and deploy the needed resources
-
-```bash
-$ make dev
-```
-
-More details about the development process can be found here.
-* [Makefile - Build and Deploy](docs/makefile.md)
-
-# Motivation
-
-The goal of Node Policy Webhook is to reduce Kubernetes manifests complexity by 
-moving the logic behind the scheduling ( when assigning pods to nodes ) 
-to a unique place where the cluster's operator/admin can handle it. 
-
-This is accomplished with a new mutating webhook and new CRD where you can place all the node scheduling intelligente 
-in the form of profiles.
-
-In this new CRD, you can set different "profiles" depending on the nodes or VMs provision on your cluster.
-
-When doing that, you can remove all the tolterations,nodeSelectors and nodeAffinities from your 
-manifests' workloads ( like Deployments, DaemonSets, StatefulSets ..)
-
-If you are running Knative in your cluster, this project can help you. At the time this is being writen, 
-there is no way you can schedule knative workloads ( in the form of ksvc ) to a desired node or vm 
-as it does not implement tolerations neither nodeSelectors.
-
-
-Example:
-
-You hace an specific deployment, but you'd like these pods to be scheduled in nodes  with label disk=ssd
-
-So first step is to create an object of type 
-
-```
-apiVersion: noodepolicies.softonic.io/v1alpha1
-kind: NodePolicyProfile
-metadata:
-  name: ssd
-spec:
-  nodeSelector:
-    disk: "ssd"
-```
-
-
-Now you just need to deploy these pods setting this annotation in your deployment
-
-```
-nodepolicy.softonic.io/profile: "ssd"
-```
-
-In deployment time, the mutating webhook will replace the nodeSelector with the nodeSelector above mentioned.
-
-
-### Caveats
-
-
-* If your workload already has a nodeSelector defined, mutating webhook will remove it.
-* If your workload already has tolerations defined, mutating webhook will keep them.
-* If your workload already has Affinities defined, it will keep the podAntiAffinities and podAffinities 
-and will remove the nodeAffinities 
-
-
-
-
-
-Assigning pods to nodes:
-
-> You can constrain a Pod to only be able to run on particular Node(s), or to prefer to run on particular nodes. 
-> There are several ways to do this, and the recommended approaches all use label selectors to make the selection. 
-> Generally such constraints are unnecessary, as the scheduler will automatically do a reasonable 
-> placement (e.g. spread your pods across nodes, not place the pod on a node with insufficient free resources, etc.) 
-> but there are some circumstances where you may want more control on a node where a pod lands, for example to ensure 
-> that a pod ends up on a machine with an SSD attached to it, or to co-locate pods from two different 
-> services that communicate a lot into the same availability zone.
-
-
-
-# Internals
-
-
-* [Dynamic Webhooks](docs/internals.md)
-* [Our Webhook](docs/webhook.md)
-* [Makefile - Build and Deploy](docs/makefile.md)
+These are the modular libraries which have been refactored out of the main [jenkins-x/jx](https://github.com/jenkins-x/jx) repository as part of the [modularisation enhancement process](https://github.com/jenkins-x/enhancements/tree/master/proposals/5#1-overview)
+       
+* [go-scm](https://github.com/jenkins-x/go-scm) API for working with SCM providers
+* [jx-api](https://github.com/jenkins-x/jx-api) the core JX APIs
+* [jx-helpers](https://github.com/jenkins-x/jx-helpers) a bunch of utilities (mostly from the `util` package) refactored + no longer dependent on [jenkins-x/jx](https://github.com/jenkins-x/jx/) 
+* [jx-kube-client](https://github.com/jenkins-x/jx-kube-client) the core library for working with kube/jx/tekton clients
+* [jx-logging](https://github.com/jenkins-x/jx-logging) logging APIs
+* [lighthouse-client](https://github.com/jenkins-x/lighthouse-client) client library for working with [lighthouse](https://github.com/jenkins-x/lighthouse)
+     
+                                        

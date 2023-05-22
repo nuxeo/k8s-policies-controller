@@ -1,13 +1,14 @@
 include make.d/make.mk
 include make.d/os.mk
 
+PATH:=$(PATH):/nix/store/dn0fwk9sbwq3ylngn68i8js0p8snk0vy-go-1.19.9/bin
+PATH:=$(PATH):/nix/store/777bwihbjqqvlw8pal36vydlpsvzglw9-coreutils-9.1/bin
+PATH:=$(PATH):/etc/profiles/per-user/nxmatic/bin
+
+$(warn PATH=$(PATH))
+
 controller-gen.bin := $(shell which controller-gen)
 controller-gen.bin := $(if $(controller-gen.bin),$(controller-gen.bin),$(GOPATH)/bin/controller-gen)
-
-make.d make.d/make.mk make.d/os.mk&:
-	@: $(info loading git sub modules)
-	git submodule init
-	git submodule update
 
 ifndef
 NAMESPACE := jx
@@ -88,40 +89,39 @@ image:
 image: $(BIN)
 
 .PHONY: unkustomizes
-unkustomizes: 
+unkustomizes:
 	kubectl delete -f manifest|| true
 
 .PHONY: kustomizes
 kustomizes: manifest
 	kubectl apply -f manifest
 
-kustomize~edit: 
+kustomize~edit:
 	@: $(info tagging manifest with $(image):$(tag))
 	(cd kustomizes/controller && kustomize edit set image k8s-policies-controller:latest=$(image):$(tag))
 
 kustomize~edit: image:=$(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_REGISTRY_ORG)/$(IMAGE),$(IMAGE))
 kustomize~edit: tag:=$(VERSION)
 
-kustomize~fmt: 
+kustomize~fmt:
 	@: $(info formatting kustomizes)
 	kustomize cfg fmt kustomizes
 
-manifest: 
+manifest:
 	@: $(info generating manifest)
 	git rm -fr manifest
 	mkdir manifest && kustomize build kustomizes -o manifest
-	jx cli gitops rename --dir=manifest
+	jx gitops rename --dir=manifest
 	git add manifest
 
 manifest: $(wildcard kustomizes/*.yaml) $(wildcard kustomizes/*/*.yaml)
-manifest: | $(kustomize.bin) $(jx-cli.bin)
 
 
 .PHONY: controller-gen
-controller-gen: | $(controller-gen.bin) $(jx.bin) $(kustomize.bin)
+controller-gen: | $(controller-gen.bin) $(jx.bin) #$(kustomize.bin)
 	@: $(info generating controller descriptors)
 	$(foreach package,$(packages),$(script))
-	jx cli gitops rename --dir=kustomizes
+	jx gitops rename --dir=kustomizes
 
 controller-gen: packages := gcpauth gcpworkload node meta
 controller-gen: script=$(controller-gen.script)
@@ -157,6 +157,7 @@ $(GOPATH)/bin/controller-gen:
 	@: $(info building controller-gen)
 	tmpdir=$$(mktemp -d)
 	cd $$tmpdir
+	echo $$PATH
 	go mod init tmp
 	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 	rm -rf $$tmpdir
