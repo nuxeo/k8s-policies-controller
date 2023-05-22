@@ -11,4 +11,4 @@ commonLabels:
 images:
 - name: k8s-policies-controller:latest
   newName: k8s-policies-controller
-  newTag: bbd86f1-2-gccdf9e8
+  newTag: bbd86f1-3-g7ef49ed
