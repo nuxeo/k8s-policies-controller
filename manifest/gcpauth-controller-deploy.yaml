@@ -25,7 +25,7 @@ spec:
         - --zap-devel
         - --zap-log-level=debug
         - --kind=gcpauth
-        image: k8s-policies-controller:bbd86f1-3-g7ef49ed
+        image: k8s-policies-controller:0.0.4
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
