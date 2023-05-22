@@ -25,7 +25,7 @@ spec:
         - --zap-devel
         - --zap-log-level=debug
         - --kind=node
-        image: k8s-policies-controller:latest
+        image: k8s-policies-controller:bbd86f1
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -56,4 +56,4 @@ spec:
       - name: cert
         secret:
           defaultMode: 420
-          secretName: controller-tls
+          secretName: node-controller-tls
