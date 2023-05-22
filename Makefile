@@ -4,6 +4,7 @@ include make.d/os.mk
 PATH:=$(PATH):/nix/store/dn0fwk9sbwq3ylngn68i8js0p8snk0vy-go-1.19.9/bin
 PATH:=$(PATH):/nix/store/777bwihbjqqvlw8pal36vydlpsvzglw9-coreutils-9.1/bin
 PATH:=$(PATH):/etc/profiles/per-user/nxmatic/bin
+PATH:=$(PATH):/nix/store/rzfnja8myhjwl0fgb8ixd1qdsnhw5mrr-goreleaser-1.13.0/bin
 
 $(warn PATH=$(PATH))
 
